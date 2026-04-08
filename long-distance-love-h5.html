@@ -630,26 +630,56 @@
             }
         });
         
-        // 状态滑块
-        document.getElementById('mood-slider').addEventListener('input', function() {
-            const value = this.value;
-            document.getElementById('status-mood-value').textContent = value;
-        });
-        
-        document.getElementById('affection-slider').addEventListener('input', function() {
-            const value = this.value;
-            document.getElementById('status-affection-value').textContent = value;
-        });
-        
-        document.getElementById('hunger-slider').addEventListener('input', function() {
-            const value = this.value;
-            document.getElementById('status-hunger-value').textContent = value;
-        });
-        
-        document.getElementById('energy-slider').addEventListener('input', function() {
-            const value = this.value;
-            document.getElementById('status-energy-value').textContent = value;
-        });
+        // 页面切换函数
+        function showPage(pageId) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            // 显示目标页面
+            document.getElementById(pageId).classList.remove('hidden');
+            
+            // 如果显示的是状态管理页面，绑定滑块事件
+            if (pageId === 'status-page') {
+                setTimeout(() => {
+                    // 心情值滑块
+                    const moodSlider = document.getElementById('mood-slider');
+                    if (moodSlider) {
+                        moodSlider.addEventListener('input', function() {
+                            const value = this.value;
+                            document.getElementById('status-mood-value').textContent = value;
+                        });
+                    }
+                    
+                    // 好感度滑块
+                    const affectionSlider = document.getElementById('affection-slider');
+                    if (affectionSlider) {
+                        affectionSlider.addEventListener('input', function() {
+                            const value = this.value;
+                            document.getElementById('status-affection-value').textContent = value;
+                        });
+                    }
+                    
+                    // 饱食度滑块
+                    const hungerSlider = document.getElementById('hunger-slider');
+                    if (hungerSlider) {
+                        hungerSlider.addEventListener('input', function() {
+                            const value = this.value;
+                            document.getElementById('status-hunger-value').textContent = value;
+                        });
+                    }
+                    
+                    // 精力值滑块
+                    const energySlider = document.getElementById('energy-slider');
+                    if (energySlider) {
+                        energySlider.addEventListener('input', function() {
+                            const value = this.value;
+                            document.getElementById('status-energy-value').textContent = value;
+                        });
+                    }
+                }, 100);
+            }
+        }
         
         // 保存状态
         document.getElementById('save-status').addEventListener('click', function() {
