@@ -693,15 +693,16 @@
             userData.status.hunger = parseInt(hunger);
             userData.status.energy = parseInt(energy);
             
-            // 更新首页状态
-            document.getElementById('my-mood-value').textContent = mood;
-            document.getElementById('my-affection-value').textContent = affection;
-            document.getElementById('my-hunger-value').textContent = hunger;
-            document.getElementById('my-energy-value').textContent = energy;
-            
             showToast('状态保存成功');
             setTimeout(() => {
                 showPage('home-page');
+                // 跳转到首页后更新数值显示
+                setTimeout(() => {
+                    document.getElementById('my-mood-value').textContent = mood;
+                    document.getElementById('my-affection-value').textContent = affection;
+                    document.getElementById('my-hunger-value').textContent = hunger;
+                    document.getElementById('my-energy-value').textContent = energy;
+                }, 100);
             }, 1000);
         });
         
