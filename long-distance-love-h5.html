@@ -159,7 +159,6 @@
                 </div>
             </div>
             
-            <!-- 状态卡片 -->
             <h2 class="text-xl font-bold text-gray-800 mb-4">我的状态</h2>
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div class="status-card bg-white rounded-xl shadow-md p-4">
@@ -168,7 +167,7 @@
                         <span class="font-bold text-pink-500" id="my-mood-value">75</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div class="bg-pink-500 h-2.5 rounded-full" style="width: 75%"></div>
+                        <div class="bg-pink-500 h-2.5 rounded-full" id="my-mood-bar" style="width: 75%"></div>
                     </div>
                 </div>
                 <div class="status-card bg-white rounded-xl shadow-md p-4">
@@ -177,7 +176,7 @@
                         <span class="font-bold text-blue-500" id="my-affection-value">90</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div class="bg-blue-500 h-2.5 rounded-full" style="width: 90%"></div>
+                        <div class="bg-blue-500 h-2.5 rounded-full" id="my-affection-bar" style="width: 90%"></div>
                     </div>
                 </div>
                 <div class="status-card bg-white rounded-xl shadow-md p-4">
@@ -186,7 +185,7 @@
                         <span class="font-bold text-yellow-500" id="my-hunger-value">60</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 60%"></div>
+                        <div class="bg-yellow-500 h-2.5 rounded-full" id="my-hunger-bar" style="width: 60%"></div>
                     </div>
                     <div class="text-xs text-gray-500 mt-2" id="hunger-countdown">30分钟后减少</div>
                 </div>
@@ -196,7 +195,7 @@
                         <span class="font-bold text-green-500" id="my-energy-value">85</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div class="bg-green-500 h-2.5 rounded-full" style="width: 85%"></div>
+                        <div class="bg-green-500 h-2.5 rounded-full" id="my-energy-bar" style="width: 85%"></div>
                     </div>
                 </div>
             </div>
@@ -414,7 +413,7 @@
                 </div>
                 <div class="music-item flex items-center py-3 border-b border-gray-100">
                     <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center mr-3">
-                        <img src="https://p2.music.126.net/79iI-NcQmXmXo7jV4b91nQ==/109951164168662101.jpg?param=130y130" alt="专辑封面" class="w-full h-full rounded">
+                        <img src="https://p2.music.126.net/79iI-NcQmXmXo7jV4b91nQ==/109951164168662101.jpg?param=130y130" alt="album cover" class="w-full h-full rounded">
                     </div>
                     <div class="flex-1">
                         <p class="font-medium text-gray-800">起风了</p>
@@ -426,7 +425,7 @@
                 </div>
                 <div class="music-item flex items-center py-3">
                     <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center mr-3">
-                        <img src="https://p1.music.126.net/34rW7dU0xH0FwA8aG0pQ1Q==/109951164469906207.jpg?param=130y130" alt="专辑封面" class="w-full h-full rounded">
+                        <img src="https://p1.music.126.net/34rW7dU0xH0FwA8aG0pQ1Q==/109951164469906207.jpg?param=130y130" alt="album cover" class="w-full h-full rounded">
                     </div>
                     <div class="flex-1">
                         <p class="font-medium text-gray-800">追光者</p>
@@ -442,7 +441,7 @@
             <div class="bg-white rounded-xl shadow-md p-6 mb-6">
                 <div class="flex items-center mb-6">
                     <div class="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden mr-4">
-                        <img src="https://p1.music.126.net/xoJ5R9W2s82XWj97HcXc0w==/109951163658621183.jpg?param=200y200" alt="专辑封面" class="w-full h-full object-cover">
+                        <img src="https://p1.music.126.net/xoJ5R9W2s82XWj97HcXc0w==/109951163658621183.jpg?param=200y200" alt="album cover" class="w-full h-full object-cover">
                     </div>
                     <div class="flex-1">
                         <p class="font-bold text-gray-800 text-lg">小幸运</p>
@@ -561,13 +560,28 @@
             lng: 121.4737
         };
         
+        // ==============================================
+        // 【核心】刷新首页状态（实时同步）
+        // ==============================================
+        function refreshHomeStatus() {
+            document.getElementById("my-mood-value").innerText = userData.status.mood;
+            document.getElementById("my-mood-bar").style.width = userData.status.mood + "%";
+
+            document.getElementById("my-affection-value").innerText = userData.status.affection;
+            document.getElementById("my-affection-bar").style.width = userData.status.affection + "%";
+
+            document.getElementById("my-hunger-value").innerText = userData.status.hunger;
+            document.getElementById("my-hunger-bar").style.width = userData.status.hunger + "%";
+
+            document.getElementById("my-energy-value").innerText = userData.status.energy;
+            document.getElementById("my-energy-bar").style.width = userData.status.energy + "%";
+        }
+
         // 页面切换
         function showPage(pageId) {
-            // 隐藏所有页面
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.add('hidden');
             });
-            // 显示目标页面
             document.getElementById(pageId).classList.remove('hidden');
         }
         
@@ -581,30 +595,23 @@
             }, 2000);
         }
         
-        // 登录按钮点击
-        document.getElementById('wechat-login').addEventListener('click', function() {
-            showToast('正在微信授权...');
-            setTimeout(() => {
-                showPage('bind-page');
-            }, 1500);
-        });
-        
         // 游客模式
         document.getElementById('demo-login').addEventListener('click', function() {
             showToast('进入游客模式');
             setTimeout(() => {
                 showPage('home-page');
+                refreshHomeStatus();
             }, 1000);
         });
         
         // 使用绑定码登录
         function loginWithCode(code) {
             showToast(`登录 ${code}`);
-            // 存储用户信息
             localStorage.setItem('userCode', code);
             localStorage.setItem('partnerCode', code === 'sheneryyds' ? 'zjq1314' : 'sheneryyds');
             setTimeout(() => {
                 showPage('home-page');
+                refreshHomeStatus();
             }, 1000);
         }
         
@@ -616,114 +623,72 @@
         // 绑定情侣
         document.getElementById('bind-button').addEventListener('click', function() {
             const code = document.getElementById('bind-code').value;
-            // 只允许使用固定的两个绑定码
             if (code === 'sheneryyds' || code === 'zjq1314') {
                 showToast('绑定成功！');
-                // 存储用户信息
                 localStorage.setItem('userCode', code);
                 localStorage.setItem('partnerCode', code === 'sheneryyds' ? 'zjq1314' : 'sheneryyds');
                 setTimeout(() => {
                     showPage('home-page');
+                    refreshHomeStatus();
                 }, 1500);
             } else {
                 showToast('无效的绑定码，请使用正确的绑定码');
             }
         });
         
-        // 页面切换函数
-        function showPage(pageId) {
-            // 隐藏所有页面
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.add('hidden');
-            });
-            // 显示目标页面
-            document.getElementById(pageId).classList.remove('hidden');
+        // 进入状态页时同步当前值
+        function showStatusPage() {
+            showPage('status-page');
             
-            // 如果显示的是状态管理页面，绑定滑块事件
-            if (pageId === 'status-page') {
-                setTimeout(() => {
-                    // 心情值滑块
-                    const moodSlider = document.getElementById('mood-slider');
-                    if (moodSlider) {
-                        moodSlider.addEventListener('input', function() {
-                            const value = this.value;
-                            document.getElementById('status-mood-value').textContent = value;
-                        });
-                    }
-                    
-                    // 好感度滑块
-                    const affectionSlider = document.getElementById('affection-slider');
-                    if (affectionSlider) {
-                        affectionSlider.addEventListener('input', function() {
-                            const value = this.value;
-                            document.getElementById('status-affection-value').textContent = value;
-                        });
-                    }
-                    
-                    // 饱食度滑块
-                    const hungerSlider = document.getElementById('hunger-slider');
-                    if (hungerSlider) {
-                        hungerSlider.addEventListener('input', function() {
-                            const value = this.value;
-                            document.getElementById('status-hunger-value').textContent = value;
-                        });
-                    }
-                    
-                    // 精力值滑块
-                    const energySlider = document.getElementById('energy-slider');
-                    if (energySlider) {
-                        energySlider.addEventListener('input', function() {
-                            const value = this.value;
-                            document.getElementById('status-energy-value').textContent = value;
-                        });
-                    }
-                }, 100);
-            }
+            document.getElementById('mood-slider').value = userData.status.mood;
+            document.getElementById('status-mood-value').textContent = userData.status.mood;
+            
+            document.getElementById('affection-slider').value = userData.status.affection;
+            document.getElementById('status-affection-value').textContent = userData.status.affection;
+            
+            document.getElementById('hunger-slider').value = userData.status.hunger;
+            document.getElementById('status-hunger-value').textContent = userData.status.hunger;
+            
+            document.getElementById('energy-slider').value = userData.status.energy;
+            document.getElementById('status-energy-value').textContent = userData.status.energy;
         }
         
-        // 保存状态
+        // 保存状态 → 实时同步到首页
         document.getElementById('save-status').addEventListener('click', function() {
-            const mood = document.getElementById('mood-slider').value;
-            const affection = document.getElementById('affection-slider').value;
-            const hunger = document.getElementById('hunger-slider').value;
-            const energy = document.getElementById('energy-slider').value;
+            const mood = parseInt(document.getElementById('mood-slider').value);
+            const affection = parseInt(document.getElementById('affection-slider').value);
+            const hunger = parseInt(document.getElementById('hunger-slider').value);
+            const energy = parseInt(document.getElementById('energy-slider').value);
             
-            userData.status.mood = parseInt(mood);
-            userData.status.affection = parseInt(affection);
-            userData.status.hunger = parseInt(hunger);
-            userData.status.energy = parseInt(energy);
+            // 更新数据
+            userData.status.mood = mood;
+            userData.status.affection = affection;
+            userData.status.hunger = hunger;
+            userData.status.energy = energy;
             
-            showToast('状态保存成功');
+            showToast('状态保存成功 ✅');
+            
+            // 立即刷新首页
+            refreshHomeStatus();
+            
             setTimeout(() => {
                 showPage('home-page');
-                // 跳转到首页后更新数值显示
-                setTimeout(() => {
-                    document.getElementById('my-mood-value').textContent = mood;
-                    document.getElementById('my-affection-value').textContent = affection;
-                    document.getElementById('my-hunger-value').textContent = hunger;
-                    document.getElementById('my-energy-value').textContent = energy;
-                }, 100);
             }, 1000);
         });
         
-        // 饱食度自动递减
+        // 饱食度递减
         function decreaseHunger() {
             if (userData.status.hunger > 0) {
                 userData.status.hunger -= 5;
                 if (userData.status.hunger < 0) userData.status.hunger = 0;
-                
-                // 更新页面
-                document.getElementById('my-hunger-value').textContent = userData.status.hunger;
-                document.getElementById('status-hunger-value').textContent = userData.status.hunger;
-                
+                refreshHomeStatus();
                 showToast('饱食度减少了5点');
             }
         }
         
-        // 每小时减少饱食度
         setInterval(decreaseHunger, 3600000);
         
-        // 倒计时显示
+        // 倒计时
         function updateHungerCountdown() {
             const now = new Date();
             const minutes = 60 - now.getMinutes();
@@ -742,47 +707,38 @@
             }
         });
         
-        // 音乐平台选择
+        // 音乐平台
         function selectMusicPlatform(platform) {
             showToast(`已选择${platform === 'qq' ? 'QQ音乐' : '网易云音乐'}`);
-            // 这里可以添加对接音乐平台的逻辑
         }
         
-        // 邀请伴侣功能
+        // 邀请
         function copyCode() {
             const code = document.getElementById('couple-code').textContent;
-            navigator.clipboard.writeText(code).then(function() {
-                showToast('绑定码已复制');
-            }, function() {
-                showToast('复制失败，请手动复制');
-            });
+            navigator.clipboard.writeText(code).then(() => showToast('复制成功'));
         }
         
         function shareWechat() {
-            showToast('请在微信中打开此页面分享');
-            // 这里可以添加微信分享的逻辑
+            showToast('请在微信中分享');
         }
         
         function bindPartner() {
             const code = document.getElementById('partner-code').value;
-            // 只允许使用固定的两个绑定码
             if (code === 'sheneryyds' || code === 'zjq1314') {
                 showToast('绑定成功！');
-                // 存储用户信息
                 localStorage.setItem('userCode', code);
                 localStorage.setItem('partnerCode', code === 'sheneryyds' ? 'zjq1314' : 'sheneryyds');
                 setTimeout(() => {
                     showPage('home-page');
+                    refreshHomeStatus();
                 }, 1500);
             } else {
-                showToast('无效的绑定码，请使用正确的绑定码');
+                showToast('无效绑定码');
             }
         }
         
-        // 音乐播放器控制
+        // 音乐进度
         let isPlaying = true;
-        
-        // 模拟音乐播放进度
         function updateMusicProgress() {
             if (isPlaying) {
                 const progress = document.getElementById('music-progress');
@@ -791,22 +747,19 @@
                 value += 1;
                 if (value > 225) value = 0;
                 progress.value = value;
-                
                 const minutes = Math.floor(value / 60);
                 const seconds = value % 60;
                 currentTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             }
         }
-        
         setInterval(updateMusicProgress, 1000);
         
-        // 页面加载完成后初始化
+        // 初始化
         window.onload = function() {
-            // 检查是否已登录
             const userCode = localStorage.getItem('userCode');
             if (userCode) {
-                // 已登录，直接显示首页
                 showPage('home-page');
+                refreshHomeStatus();
             }
         };
     </script>
