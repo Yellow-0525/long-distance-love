@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>情侣异地恋小助手</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        /* 自定义颜色 */
+        :root {
+            --primary-color: #ff6b81;
+            --secondary-color: #5dade2;
+            --accent-color: #9b59b6;
+            --background-color: #f5f5f5;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --text-light: #999999;
+        }
+        
+        /* 页面切换动画 */
+        .page {
+            transition: all 0.3s ease;
+        }
+        
+        /* 按钮动效 */
+        .btn {
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 滑动条样式 */
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #f0f0f0;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        /* 状态卡片动效 */
+        .status-card {
+            transition: all 0.3s ease;
+        }
+        
+        .status-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 进度条动画 */
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        
+        /* Toast 样式 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 页面容器 -->
+    <div class="container mx-auto px-4 py-6 max-w-md">
+        <!-- 登录/绑定页 -->
+        <div id="login-page" class="page">
+            <div class="flex flex-col items-center justify-center min-h-screen">
+                <div class="w-32 h-32 mb-8 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-heart text-white text-6xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">情侣异地恋小助手</h1>
+                <p class="text-gray-600 mb-8 text-center">让异地恋不再孤单</p>
+                <button id="wechat-login" class="btn w-full bg-green-500 text-white py-3 px-6 rounded-full flex items-center justify-center mb-4">
+                    <i class="fab fa-weixin mr-3 text-xl"></i>
+                    微信授权登录
+                </button>
+                <button id="demo-login" class="btn w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user mr-3"></i>
+                    游客模式体验
+                </button>
+            </div>
+        </div>
+        
+        <!-- 绑定情侣页 -->
+        <div id="bind-page" class="page hidden">
+            <div class="flex flex-col items-center justify-center min-h-screen">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">绑定情侣</h1>
+                <p class="text-gray-600 mb-8 text-center">输入对方的绑定码，建立情侣关系</p>
+                <div class="w-full mb-6">
+                    <input type="text" id="bind-code" placeholder="请输入绑定码" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400">
+                </div>
+                <button id="bind-button" class="btn w-full bg-pink-500 text-white py-3 px-6 rounded-full mb-4">
+                    绑定
+                </button>
+                <button id="generate-code" class="btn w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-full">
+                    生成我的绑定码
+                </button>
+            </div>
+        </div>
+        
+        <!-- 首页 -->
+        <div id="home-page" class="page hidden">
+            <!-- 情侣头像 -->
+            <div class="flex justify-center my-6">
+                <div class="relative">
+                    <div class="w-20 h-20 rounded-full bg-pink-400 flex items-center justify-center border-4 border-white shadow-md">
+                        <i class="fas fa-user text-white text-2xl"></i>
+                    </div>
+                    <div class="w-20 h-20 rounded-full bg-blue-400 flex items-center justify-center border-4 border-white shadow-md -ml-8">
+                        <i class="fas fa-user text-white text-2xl"></i>
+                    </div>
+                    <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-3 py-1 rounded-full text-xs text-gray-600 shadow-md">
+                        <i class="fas fa-heart text-pink-500 mr-1"></i>已绑定
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 状态卡片 -->
+            <h2 class="text-xl font-bold text-gray-800 mb-4">我的状态</h2>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="status-card bg-white rounded-xl shadow-md p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">心情值</span>
+                        <span class="font-bold text-pink-500" id="my-mood-value">75</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-pink-500 h-2.5 rounded-full" style="width: 75%"></div>
+                    </div>
+                </div>
+                <div class="status-card bg-white rounded-xl shadow-md p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">好感度</span>
+                        <span class="font-bold text-blue-500" id="my-affection-value">90</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-blue-500 h-2.5 rounded-full" style="width: 90%"></div>
+                    </div>
+                </div>
+                <div class="status-card bg-white rounded-xl shadow-md p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">饱食度</span>
+                        <span class="font-bold text-yellow-500" id="my-hunger-value">60</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 60%"></div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2" id="hunger-countdown">30分钟后减少</div>
+                </div>
+                <div class="status-card bg-white rounded-xl shadow-md p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">精力值</span>
+                        <span class="font-bold text-green-500" id="my-energy-value">85</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-green-500 h-2.5 rounded-full" style="width: 85%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="text-xl font-bold text-gray-800 mb-4">伴侣状态</h2>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="status-card bg-white rounded-xl shadow-md p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">心情值</span>
+                        <span class="font-bold text-pink-500" id="partner-mood-value">80</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-pink-500 h-2.5 rounded-full" style="width: 80%"></div>
+                    </div>
+                </div>
+                <div class="status-card bg-white rounded-xl shadow-md p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">好感度</span>
+                        <span class="font-bold text-blue-500" id="partner-affection-value">85</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-blue-500 h-2.5 rounded-full" style="width: 85%"></div>
+                    </div>
+                </div>
+                <div class="status-card bg-white rounded-xl shadow-md p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">饱食度</span>
+                        <span class="font-bold text-yellow-500" id="partner-hunger-value">70</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 70%"></div>
+                    </div>
+                </div>
+                <div class="status-card bg-white rounded-xl shadow-md p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">精力值</span>
+                        <span class="font-bold text-green-500" id="partner-energy-value">75</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-green-500 h-2.5 rounded-full" style="width: 75%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 功能入口 -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <button class="btn bg-white rounded-xl shadow-md p-4 flex flex-col items-center justify-center" onclick="showPage('status-page')">
+                    <i class="fas fa-heartbeat text-pink-500 text-2xl mb-2"></i>
+                    <span class="text-gray-700">状态管理</span>
+                </button>
+                <button class="btn bg-white rounded-xl shadow-md p-4 flex flex-col items-center justify-center" onclick="showPage('music-page')">
+                    <i class="fas fa-music text-purple-500 text-2xl mb-2"></i>
+                    <span class="text-gray-700">一起听歌</span>
+                </button>
+                <button class="btn bg-white rounded-xl shadow-md p-4 flex flex-col items-center justify-center" onclick="showPage('share-page')">
+                    <i class="fas fa-share-alt text-blue-500 text-2xl mb-2"></i>
+                    <span class="text-gray-700">邀请伴侣</span>
+                </button>
+                <button class="btn bg-white rounded-xl shadow-md p-4 flex flex-col items-center justify-center" onclick="showPage('settings-page')">
+                    <i class="fas fa-cog text-gray-500 text-2xl mb-2"></i>
+                    <span class="text-gray-700">设置</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 状态面板 -->
+        <div id="status-page" class="page hidden">
+            <div class="flex items-center justify-between mb-6">
+                <button class="text-gray-600" onclick="showPage('home-page')">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">状态管理</h1>
+                <div class="w-8"></div>
+            </div>
+            
+            <!-- 心情值 -->
+            <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-700">心情值</span>
+                    <span class="font-bold text-pink-500" id="status-mood-value">75</span>
+                </div>
+                <input type="range" id="mood-slider" min="0" max="100" value="75" class="w-full" style="accent-color: #ff6b81;">
+                <div class="flex justify-between mt-2 text-xs text-gray-500">
+                    <span>0</span>
+                    <span>50</span>
+                    <span>100</span>
+                </div>
+            </div>
+            
+            <!-- 好感度 -->
+            <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-700">好感度</span>
+                    <span class="font-bold text-blue-500" id="status-affection-value">90</span>
+                </div>
+                <input type="range" id="affection-slider" min="0" max="100" value="90" class="w-full" style="accent-color: #5dade2;">
+                <div class="flex justify-between mt-2 text-xs text-gray-500">
+                    <span>0</span>
+                    <span>50</span>
+                    <span>100</span>
+                </div>
+            </div>
+            
+            <!-- 饱食度 -->
+            <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-700">饱食度</span>
+                    <span class="font-bold text-yellow-500" id="status-hunger-value">60</span>
+                </div>
+                <input type="range" id="hunger-slider" min="0" max="100" value="60" class="w-full" style="accent-color: #f1c40f;">
+                <div class="flex justify-between mt-2 text-xs text-gray-500">
+                    <span>0</span>
+                    <span>50</span>
+                    <span>100</span>
+                </div>
+                <div class="text-xs text-gray-500 mt-2">
+                    饱食度每小时自动减少5点
+                </div>
+            </div>
+            
+            <!-- 精力值 -->
+            <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-700">精力值</span>
+                    <span class="font-bold text-green-500" id="status-energy-value">85</span>
+                </div>
+                <input type="range" id="energy-slider" min="0" max="100" value="85" class="w-full" style="accent-color: #2ecc71;">
+                <div class="flex justify-between mt-2 text-xs text-gray-500">
+                    <span>0</span>
+                    <span>50</span>
+                    <span>100</span>
+                </div>
+            </div>
+            
+            <button id="save-status" class="btn w-full bg-pink-500 text-white py-3 px-6 rounded-full">
+                保存状态
+            </button>
+        </div>
+        
+        <!-- 邀请伴侣页 -->
+        <div id="share-page" class="page hidden">
+            <div class="flex items-center justify-between mb-6">
+                <button class="text-gray-600" onclick="showPage('home-page')">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">邀请伴侣</h1>
+                <div class="w-8"></div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h3 class="font-bold text-gray-800 mb-4 text-center">您的绑定码</h3>
+                <div class="text-3xl font-bold text-center mb-6 p-4 bg-gray-50 rounded-lg" id="couple-code">123456</div>
+                <p class="text-gray-600 mb-6 text-center">请将此绑定码分享给您的伴侣</p>
+                <button class="btn w-full bg-blue-500 text-white py-3 px-6 rounded-full mb-4" onclick="copyCode()">
+                    <i class="fas fa-copy mr-2"></i>复制绑定码
+                </button>
+                <button class="btn w-full bg-green-500 text-white py-3 px-6 rounded-full" onclick="shareWechat()">
+                    <i class="fab fa-weixin mr-2"></i>分享到微信
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h3 class="font-bold text-gray-800 mb-4">伴侣绑定码</h3>
+                <input type="text" id="partner-code" placeholder="请输入伴侣的绑定码" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 mb-4">
+                <button class="btn w-full bg-pink-500 text-white py-3 px-6 rounded-full" onclick="bindPartner()">
+                    绑定伴侣
+                </button>
+            </div>
+        </div>
+        
+        <!-- 一起听歌 -->
+        <div id="music-page" class="page hidden">
+            <div class="flex items-center justify-between mb-6">
+                <button class="text-gray-600" onclick="showPage('home-page')">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">一起听歌</h1>
+                <div class="w-8"></div>
+            </div>
+            
+            <!-- 音乐平台选择 -->
+            <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+                <h3 class="font-bold text-gray-800 mb-4">选择音乐平台</h3>
+                <div class="flex space-x-4">
+                    <button class="btn flex-1 bg-green-100 text-green-700 py-3 px-4 rounded-lg flex items-center justify-center" onclick="selectMusicPlatform('qq')">
+                        <i class="fab fa-qq mr-2"></i>QQ音乐
+                    </button>
+                    <button class="btn flex-1 bg-red-100 text-red-700 py-3 px-4 rounded-lg flex items-center justify-center" onclick="selectMusicPlatform('netease')">
+                        <i class="fas fa-music mr-2"></i>网易云音乐
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 搜索框 -->
+            <div class="flex mb-6">
+                <input type="text" id="music-search" placeholder="搜索歌曲" class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-pink-400">
+                <button id="search-button" class="bg-pink-500 text-white px-4 py-3 rounded-r-lg">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            
+            <!-- 搜索结果 -->
+            <div id="search-results" class="bg-white rounded-xl shadow-md p-4 mb-6 hidden">
+                <div class="music-item flex items-center py-3 border-b border-gray-100">
+                    <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center mr-3">
+                        <img src="https://p1.music.126.net/xoJ5R9W2s82XWj97HcXc0w==/109951163658621183.jpg?param=130y130" alt="专辑封面" class="w-full h-full rounded">
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800">小幸运</p>
+                        <p class="text-sm text-gray-500">田馥甄</p>
+                    </div>
+                    <button class="text-pink-500 w-10 h-10 flex items-center justify-center">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+                <div class="music-item flex items-center py-3 border-b border-gray-100">
+                    <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center mr-3">
+                        <img src="https://p2.music.126.net/79iI-NcQmXmXo7jV4b91nQ==/109951164168662101.jpg?param=130y130" alt="专辑封面" class="w-full h-full rounded">
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800">起风了</p>
+                        <p class="text-sm text-gray-500">买辣椒也用券</p>
+                    </div>
+                    <button class="text-pink-500 w-10 h-10 flex items-center justify-center">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+                <div class="music-item flex items-center py-3">
+                    <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center mr-3">
+                        <img src="https://p1.music.126.net/34rW7dU0xH0FwA8aG0pQ1Q==/109951164469906207.jpg?param=130y130" alt="专辑封面" class="w-full h-full rounded">
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800">追光者</p>
+                        <p class="text-sm text-gray-500">岑宁儿</p>
+                    </div>
+                    <button class="text-pink-500 w-10 h-10 flex items-center justify-center">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 播放器 -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <div class="flex items-center mb-6">
+                    <div class="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden mr-4">
+                        <img src="https://p1.music.126.net/xoJ5R9W2s82XWj97HcXc0w==/109951163658621183.jpg?param=200y200" alt="专辑封面" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-gray-800 text-lg">小幸运</p>
+                        <p class="text-sm text-gray-500">田馥甄</p>
+                        <div class="flex items-center mt-2">
+                            <span class="text-xs text-pink-500 mr-2">
+                                <i class="fas fa-sync-alt mr-1"></i>同步中
+                            </span>
+                            <span class="text-xs text-gray-500">
+                                <i class="fas fa-user mr-1"></i>伴侣正在听
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between text-xs text-gray-500 mb-2">
+                        <span id="current-time">0:30</span>
+                        <span id="total-time">3:45</span>
+                    </div>
+                    <input type="range" id="music-progress" min="0" max="225" value="30" class="w-full" style="accent-color: #ff6b81;">
+                </div>
+                
+                <div class="flex justify-center items-center">
+                    <button class="w-12 h-12 flex items-center justify-center mr-8">
+                        <i class="fas fa-step-backward text-gray-600 text-xl"></i>
+                    </button>
+                    <button class="w-16 h-16 rounded-full bg-pink-500 flex items-center justify-center mr-8">
+                        <i class="fas fa-pause text-white text-2xl"></i>
+                    </button>
+                    <button class="w-12 h-12 flex items-center justify-center">
+                        <i class="fas fa-step-forward text-gray-600 text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="flex justify-center items-center mt-6">
+                    <button class="btn flex items-center justify-center text-gray-600 mr-6">
+                        <i class="fas fa-repeat mr-1"></i>循环
+                    </button>
+                    <button class="btn flex items-center justify-center text-gray-600">
+                        <i class="fas fa-volume-up mr-1"></i>音量
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 设置页面 -->
+        <div id="settings-page" class="page hidden">
+            <div class="flex items-center justify-between mb-6">
+                <button class="text-gray-600" onclick="showPage('home-page')">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">设置</h1>
+                <div class="w-8"></div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md mb-6">
+                <div class="flex items-center justify-between p-4 border-b border-gray-100">
+                    <span class="text-gray-700">个人资料</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+                <div class="flex items-center justify-between p-4 border-b border-gray-100">
+                    <span class="text-gray-700">情侣设置</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+                <div class="flex items-center justify-between p-4 border-b border-gray-100">
+                    <span class="text-gray-700">通知设置</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+                <div class="flex items-center justify-between p-4 border-b border-gray-100">
+                    <span class="text-gray-700">隐私设置</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+                <div class="flex items-center justify-between p-4">
+                    <span class="text-gray-700">关于我们</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+            
+            <button class="btn w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-full mb-4">
+                退出登录
+            </button>
+        </div>
+        
+        <!-- Toast 提示 -->
+        <div id="toast" class="toast">提示信息</div>
+    </div>
+    
+    <script>
+        // 模拟数据
+        let userData = {
+            id: 1,
+            name: "我",
+            status: {
+                mood: 75,
+                affection: 90,
+                hunger: 60,
+                energy: 85
+            },
+            location: "北京市朝阳区",
+            lat: 39.9042,
+            lng: 116.4074
+        };
+        
+        let partnerData = {
+            id: 2,
+            name: "伴侣",
+            status: {
+                mood: 80,
+                affection: 85,
+                hunger: 70,
+                energy: 75
+            },
+            location: "上海市浦东新区",
+            lat: 31.2304,
+            lng: 121.4737
+        };
+        
+        // 页面切换
+        function showPage(pageId) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            // 显示目标页面
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+        
+        // Toast 提示
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+        
+        // 登录按钮点击
+        document.getElementById('wechat-login').addEventListener('click', function() {
+            showToast('正在微信授权...');
+            setTimeout(() => {
+                showPage('bind-page');
+            }, 1500);
+        });
+        
+        // 游客模式
+        document.getElementById('demo-login').addEventListener('click', function() {
+            showToast('进入游客模式');
+            setTimeout(() => {
+                showPage('home-page');
+            }, 1000);
+        });
+        
+        // 生成绑定码
+        document.getElementById('generate-code').addEventListener('click', function() {
+            const code = Math.floor(100000 + Math.random() * 900000);
+            showToast(`您的绑定码是: ${code}`);
+        });
+        
+        // 绑定情侣
+        document.getElementById('bind-button').addEventListener('click', function() {
+            const code = document.getElementById('bind-code').value;
+            if (code) {
+                showToast('绑定成功！');
+                setTimeout(() => {
+                    showPage('home-page');
+                }, 1500);
+            } else {
+                showToast('请输入绑定码');
+            }
+        });
+        
+        // 状态滑块
+        document.getElementById('mood-slider').addEventListener('input', function() {
+            const value = this.value;
+            document.getElementById('status-mood-value').textContent = value;
+        });
+        
+        document.getElementById('affection-slider').addEventListener('input', function() {
+            const value = this.value;
+            document.getElementById('status-affection-value').textContent = value;
+        });
+        
+        document.getElementById('hunger-slider').addEventListener('input', function() {
+            const value = this.value;
+            document.getElementById('status-hunger-value').textContent = value;
+        });
+        
+        document.getElementById('energy-slider').addEventListener('input', function() {
+            const value = this.value;
+            document.getElementById('status-energy-value').textContent = value;
+        });
+        
+        // 保存状态
+        document.getElementById('save-status').addEventListener('click', function() {
+            const mood = document.getElementById('mood-slider').value;
+            const affection = document.getElementById('affection-slider').value;
+            const hunger = document.getElementById('hunger-slider').value;
+            const energy = document.getElementById('energy-slider').value;
+            
+            userData.status.mood = parseInt(mood);
+            userData.status.affection = parseInt(affection);
+            userData.status.hunger = parseInt(hunger);
+            userData.status.energy = parseInt(energy);
+            
+            // 更新首页状态
+            document.getElementById('my-mood-value').textContent = mood;
+            document.getElementById('my-affection-value').textContent = affection;
+            document.getElementById('my-hunger-value').textContent = hunger;
+            document.getElementById('my-energy-value').textContent = energy;
+            
+            showToast('状态保存成功');
+            setTimeout(() => {
+                showPage('home-page');
+            }, 1000);
+        });
+        
+        // 饱食度自动递减
+        function decreaseHunger() {
+            if (userData.status.hunger > 0) {
+                userData.status.hunger -= 5;
+                if (userData.status.hunger < 0) userData.status.hunger = 0;
+                
+                // 更新页面
+                document.getElementById('my-hunger-value').textContent = userData.status.hunger;
+                document.getElementById('status-hunger-value').textContent = userData.status.hunger;
+                
+                showToast('饱食度减少了5点');
+            }
+        }
+        
+        // 每小时减少饱食度
+        setInterval(decreaseHunger, 3600000);
+        
+        // 倒计时显示
+        function updateHungerCountdown() {
+            const now = new Date();
+            const minutes = 60 - now.getMinutes();
+            const seconds = 60 - now.getSeconds();
+            document.getElementById('hunger-countdown').textContent = `${minutes}分${seconds}秒后减少`;
+        }
+        
+        setInterval(updateHungerCountdown, 1000);
+        updateHungerCountdown();
+        
+        // 音乐搜索
+        document.getElementById('search-button').addEventListener('click', function() {
+            const searchTerm = document.getElementById('music-search').value;
+            if (searchTerm) {
+                document.getElementById('search-results').classList.remove('hidden');
+            }
+        });
+        
+        // 音乐平台选择
+        function selectMusicPlatform(platform) {
+            showToast(`已选择${platform === 'qq' ? 'QQ音乐' : '网易云音乐'}`);
+            // 这里可以添加对接音乐平台的逻辑
+        }
+        
+        // 邀请伴侣功能
+        function copyCode() {
+            const code = document.getElementById('couple-code').textContent;
+            navigator.clipboard.writeText(code).then(function() {
+                showToast('绑定码已复制');
+            }, function() {
+                showToast('复制失败，请手动复制');
+            });
+        }
+        
+        function shareWechat() {
+            showToast('请在微信中打开此页面分享');
+            // 这里可以添加微信分享的逻辑
+        }
+        
+        function bindPartner() {
+            const code = document.getElementById('partner-code').value;
+            if (code) {
+                showToast('绑定成功！');
+                setTimeout(() => {
+                    showPage('home-page');
+                }, 1500);
+            } else {
+                showToast('请输入伴侣的绑定码');
+            }
+        }
+        
+        // 音乐播放器控制
+        let isPlaying = true;
+        
+        // 模拟音乐播放进度
+        function updateMusicProgress() {
+            if (isPlaying) {
+                const progress = document.getElementById('music-progress');
+                const currentTime = document.getElementById('current-time');
+                let value = parseInt(progress.value);
+                value += 1;
+                if (value > 225) value = 0;
+                progress.value = value;
+                
+                const minutes = Math.floor(value / 60);
+                const seconds = value % 60;
+                currentTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+        
+        setInterval(updateMusicProgress, 1000);
+        
+        // 页面加载完成后初始化
+        window.onload = function() {
+            // 生成随机绑定码
+            const randomCode = Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('couple-code').textContent = randomCode;
+        };
+    </script>
+</body>
+</html>
