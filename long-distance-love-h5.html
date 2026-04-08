@@ -109,9 +109,14 @@
                 </div>
                 <h1 class="text-3xl font-bold text-gray-800 mb-2">情侣异地恋小助手</h1>
                 <p class="text-gray-600 mb-8 text-center">让异地恋不再孤单</p>
-                <button id="wechat-login" class="btn w-full bg-green-500 text-white py-3 px-6 rounded-full flex items-center justify-center mb-4">
-                    <i class="fab fa-weixin mr-3 text-xl"></i>
-                    微信授权登录
+                <h3 class="font-bold text-gray-800 mb-4 text-center">选择登录方式</h3>
+                <button class="btn w-full bg-pink-500 text-white py-3 px-6 rounded-full flex items-center justify-center mb-4" onclick="loginWithCode('sheneryyds')">
+                    <i class="fas fa-user mr-3"></i>
+                    登录 sheneryyds
+                </button>
+                <button class="btn w-full bg-blue-500 text-white py-3 px-6 rounded-full flex items-center justify-center mb-4" onclick="loginWithCode('zjq1314')">
+                    <i class="fas fa-user mr-3"></i>
+                    登录 zjq1314
                 </button>
                 <button id="demo-login" class="btn w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-full flex items-center justify-center">
                     <i class="fas fa-user mr-3"></i>
@@ -343,7 +348,7 @@
             
             <div class="bg-white rounded-xl shadow-md p-6 mb-6">
                 <h3 class="font-bold text-gray-800 mb-4 text-center">您的绑定码</h3>
-                <div class="text-3xl font-bold text-center mb-6 p-4 bg-gray-50 rounded-lg" id="couple-code">123456</div>
+                <div class="text-3xl font-bold text-center mb-6 p-4 bg-gray-50 rounded-lg" id="couple-code">sheneryyds</div>
                 <p class="text-gray-600 mb-6 text-center">请将此绑定码分享给您的伴侣</p>
                 <button class="btn w-full bg-blue-500 text-white py-3 px-6 rounded-full mb-4" onclick="copyCode()">
                     <i class="fas fa-copy mr-2"></i>复制绑定码
@@ -592,22 +597,36 @@
             }, 1000);
         });
         
+        // 使用绑定码登录
+        function loginWithCode(code) {
+            showToast(`登录 ${code}`);
+            // 存储用户信息
+            localStorage.setItem('userCode', code);
+            localStorage.setItem('partnerCode', code === 'sheneryyds' ? 'zjq1314' : 'sheneryyds');
+            setTimeout(() => {
+                showPage('home-page');
+            }, 1000);
+        }
+        
         // 生成绑定码
         document.getElementById('generate-code').addEventListener('click', function() {
-            const code = Math.floor(100000 + Math.random() * 900000);
-            showToast(`您的绑定码是: ${code}`);
+            showToast('绑定码已固定为: sheneryyds 或 zjq1314');
         });
         
         // 绑定情侣
         document.getElementById('bind-button').addEventListener('click', function() {
             const code = document.getElementById('bind-code').value;
-            if (code) {
+            // 只允许使用固定的两个绑定码
+            if (code === 'sheneryyds' || code === 'zjq1314') {
                 showToast('绑定成功！');
+                // 存储用户信息
+                localStorage.setItem('userCode', code);
+                localStorage.setItem('partnerCode', code === 'sheneryyds' ? 'zjq1314' : 'sheneryyds');
                 setTimeout(() => {
                     showPage('home-page');
                 }, 1500);
             } else {
-                showToast('请输入绑定码');
+                showToast('无效的绑定码，请使用正确的绑定码');
             }
         });
         
@@ -715,13 +734,17 @@
         
         function bindPartner() {
             const code = document.getElementById('partner-code').value;
-            if (code) {
+            // 只允许使用固定的两个绑定码
+            if (code === 'sheneryyds' || code === 'zjq1314') {
                 showToast('绑定成功！');
+                // 存储用户信息
+                localStorage.setItem('userCode', code);
+                localStorage.setItem('partnerCode', code === 'sheneryyds' ? 'zjq1314' : 'sheneryyds');
                 setTimeout(() => {
                     showPage('home-page');
                 }, 1500);
             } else {
-                showToast('请输入伴侣的绑定码');
+                showToast('无效的绑定码，请使用正确的绑定码');
             }
         }
         
@@ -748,9 +771,12 @@
         
         // 页面加载完成后初始化
         window.onload = function() {
-            // 生成随机绑定码
-            const randomCode = Math.floor(100000 + Math.random() * 900000);
-            document.getElementById('couple-code').textContent = randomCode;
+            // 检查是否已登录
+            const userCode = localStorage.getItem('userCode');
+            if (userCode) {
+                // 已登录，直接显示首页
+                showPage('home-page');
+            }
         };
     </script>
 </body>
